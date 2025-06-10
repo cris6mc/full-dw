@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Login FastAPI</title>
+    <style>
+        body {
+            background: #f7faff;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-container {
+            background: #fff;
+            padding: 2.5rem 2rem;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px rgba(0,32,91,0.10);
+            width: 320px;
+            text-align: center;
+        }
+        .login-container h2 {
+            color: #00205b;
+            margin-bottom: 1.5rem;
+            letter-spacing: 1px;
+        }
+        label {
+            display: block;
+            margin-bottom: 1.2rem;
+            text-align: left;
+            color: #00205b;
+            font-weight: 500;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 0.7rem;
+            margin-top: 0.3rem;
+            border: 1px solid #b3c6e0;
+            border-radius: 8px;
+            background: #f4f8ff;
+            font-size: 1rem;
+            color: #00205b;
+            outline: none;
+            transition: border 0.2s;
+        }
+        input[type="text"]:focus, input[type="password"]:focus {
+            border: 1.5px solid #00205b;
+        }
+        button {
+            width: 100%;
+            padding: 0.8rem;
+            background: #00205b;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #0050b3;
+        }
+        #result {
+            margin-top: 1rem;
+            min-height: 1.5em;
+        }
+        #welcome {
+            display: none;
+            color: #00205b;
+        }
+        .logo {
+            width: 60px;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <img src="https://images.seeklogo.com/logo-png/20/1/club-alianza-lima-logo-png_seeklogo-202347.png" alt="Alianza Lima" class="logo">
+        <form id="loginForm">
+            <label>Usuario:
+                <input type="text" id="username" required autocomplete="username">
+            </label>
+            <label>Contraseña:
+                <input type="password" id="password" required autocomplete="current-password">
+            </label>
+            <button type="submit">Entrar</button>
+        </form>
+        <div id="result"></div>
+        <div id="welcome">
+            <h2>¡Bienvenido, <span id="user"></span>!</h2>
+            <p>Has iniciado sesión correctamente.</p>
+        </div>
+    </div>
+    <script>
+        document.getElementById('loginForm').onsubmit = async function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const data = new URLSearchParams();
+            data.append('username', username);
+            data.append('password', password);
+
+            // Login con JWT
+            const response = await fetch('http://localhost:8000/jwt_auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: data
+            });
+
+            const resultDiv = document.getElementById('result');
+            if (response.ok) {
+                const json = await response.json();
+                // Guarda el token en localStorage
+                localStorage.setItem('token', json.access_token);
+
+                // Ahora solicita la información del usuario autenticado
+                const meResponse = await fetch('http://localhost:8000/jwt_auth/me', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + json.access_token
+                    }
+                });
+
+                if (meResponse.ok) {
+                    const meJson = await meResponse.json();
+                    document.getElementById('loginForm').style.display = 'none';
+                    document.getElementById('welcome').style.display = 'block';
+                    // Muestra el nombre real del usuario
+                    document.getElementById('user').textContent = meJson.full_name || meJson.username;
+                    resultDiv.innerHTML = `<div style="color:#0050b3;">Email: ${meJson.email}</div>`;
+                } else {
+                    const error = await meResponse.json();
+                    resultDiv.innerHTML = `<span style="color:#0050b3;">${error.detail}</span>`;
+                }
+            } else {
+                const error = await response.json();
+                resultDiv.innerHTML = `<span style="color:#0050b3;">${error.detail}</span>`;
+            }
+        }
+    </script>
+</body>
+</html>
