@@ -6,8 +6,9 @@ from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from db.client import db_client
 
+
 ALGORITHM = "HS256"
-TIME_EXPIRE = 25  # segundos
+TIME_EXPIRE = 40  # segundos
 SECRET_KEY = "78eab2372ec19b57f179832653848303b0deef170322ac02ba3c36d2a3fdfce3"
 
 router = APIRouter(prefix="/jwt_auth", tags=["jwt_auth"], responses={404: {"description": "Not found"}})
@@ -27,36 +28,10 @@ class User(BaseModel):
 class UserDB(User):
     password: str
 
-users_db = {
-    "cristian": {
-        "username": "cristian",
-        "full_name": "John Doe",
-        "email": "cris@gmail.com",
-        "disabled": False,
-        "password": "$2a$12$/q/Jc.myiyJOK.WpJZp/Aukj9YeLWBvzR82g3WezbQaefp8Jtr/EW", 
-        # 123456
-    },
-    "alice": {
-        "username": "alice",
-        "full_name": "Alice",
-        "email": "fggfs@gmail.com",
-        "disabled": False,
-        "password": "$2a$12$sqZfzfAJSdGFdH0YeWbXfeRxDX0i6VrDUnROkiGZvCpCCPn3wbKF2",
-        # contraseña1
-    },
-    "yaser": {
-        "username": "yaser",
-        "full_name": "John Doe",
-        "email": "yaser@gmail.com",
-        "disabled": False,
-        "password": "$2a$12$G8gSJj/MjDpVs5Fx7mHu5e1y/kNySIjd1RmEVLe3VOgOKhbWFH2Ua",
-        # contraseña123
-    },
-}
 
 @router.get("/hola")
 async def hola():
-    return "Hola Fast"
+    return "Holaaaa"
 
 
 @router.post("/login")

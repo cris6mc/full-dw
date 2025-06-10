@@ -3,6 +3,8 @@ def user_schema(user) -> dict:
         "id": str(user["_id"]),
         "username": user["username"],
         "email": user["email"],
+        "full_name": user.get("full_name", ""),
+        "password": user.get("password", ""),
     }
 
 def users_schema(users) -> list:

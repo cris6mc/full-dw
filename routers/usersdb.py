@@ -1,12 +1,10 @@
-# Clase en vídeo: https://youtu.be/_y9qQZXE24A?t=20480
-
-### Users DB API ###
 
 from fastapi import APIRouter, HTTPException, status
 from db.models.user import User
 from db.schemas.user import user_schema, users_schema
 from db.client import db_client
 from bson import ObjectId
+from passlib.context import CryptContext
 
 router = APIRouter(prefix="/userdb",
                    tags=["userdb"],
@@ -36,6 +34,10 @@ async def user(user: User):
 
     user_dict = dict(user)
     del user_dict["id"]
+    
+    # Encrypt password
+    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    user_dict["password"] = pwd_context.hash(user_dict["password"])
 
     id = db_client.users.insert_one(user_dict).inserted_id
 
